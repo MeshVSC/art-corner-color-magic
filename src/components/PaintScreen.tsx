@@ -4,7 +4,7 @@ import { PaintToolbar } from "./PaintToolbar";
 import { PaintCanvas } from "./PaintCanvas";
 import { usePaintHistory } from "@/hooks/usePaintHistory";
 import { useLayers } from "@/hooks/useLayers";
-import { usePaintCanvas } from "@/hooks/usePaintCanvas";
+import { usePaintCanvas, ToolType, BrushType } from "@/hooks/usePaintCanvas";
 import { FloatingDecor } from "./FloatingDecor";
 
 interface PaintScreenProps {
@@ -73,13 +73,15 @@ const paintDecoConfigs = [
 ];
 
 export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps) => {
-  const [tool, setTool] = useState<'brush' | 'eraser'>('brush');
+  const [tool, setTool] = useState<ToolType>('brush');
+  const [brushType, setBrushType] = useState<BrushType>('normal');
   const [brushSize, setBrushSize] = useState(5);
   const [brushOpacity, setBrushOpacity] = useState(100);
+  const [smoothing, setSmoothing] = useState(3);
   const [currentColor, setCurrentColor] = useState('#FF6B6B');
 
   const { saveToHistory, undo, redo, canUndo, canRedo } = usePaintHistory();
-  
+
   const {
     layers,
     activeLayerId,
@@ -97,14 +99,30 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
     flattenImage,
     getActiveLayer
   } = useLayers(imageUrl);
-  
-  const { canvasRef, startDrawing, draw, stopDrawing } = usePaintCanvas({
+
+  const handleColorPicked = (color: string) => {
+    setCurrentColor(color);
+    setTool('brush'); // Switch back to brush after picking color
+  };
+
+  const {
+    canvasRef,
+    startDrawing,
+    draw,
+    stopDrawing,
+    zoom,
+    handleZoom,
+    resetView
+  } = usePaintCanvas({
     imageUrl,
     tool,
+    brushType,
     brushSize,
     brushOpacity,
     currentColor,
+    smoothing,
     onSaveToHistory: saveToHistory,
+    onColorPicked: handleColorPicked,
     activeLayer: getActiveLayer(),
     layers
   });
@@ -185,12 +203,20 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
             <PaintToolbar
               tool={tool}
               setTool={setTool}
+              brushType={brushType}
+              setBrushType={setBrushType}
               brushSize={brushSize}
               setBrushSize={setBrushSize}
               brushOpacity={brushOpacity}
               setBrushOpacity={setBrushOpacity}
+              smoothing={smoothing}
+              setSmoothing={setSmoothing}
               currentColor={currentColor}
               setCurrentColor={setCurrentColor}
+              zoom={zoom}
+              onZoomIn={() => handleZoom(0.1)}
+              onZoomOut={() => handleZoom(-0.1)}
+              onResetView={resetView}
               onUndo={handleUndo}
               onRedo={handleRedo}
               canUndo={canUndo}
@@ -219,6 +245,7 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
               onMouseMove={draw}
               onMouseUp={stopDrawing}
               onMouseLeave={stopDrawing}
+              tool={tool}
             />
           </div>
         </div>

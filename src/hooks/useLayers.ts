@@ -8,38 +8,40 @@ export const useLayers = (initialImageUrl: string) => {
   const createLayer = useCallback((name: string, isBackground = false): Layer => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
-    if (isBackground && initialImageUrl) {
+
+    // Set canvas dimensions immediately (don't wait for image load)
+    const canvasSize = 1200;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+
+    if (isBackground && initialImageUrl && ctx) {
       const img = new Image();
+      img.crossOrigin = "anonymous"; // Handle CORS for images
       img.onload = () => {
-        // Set canvas to fixed square size
-        const canvasSize = 1200;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-        
-        if (ctx) {
-          // Clear canvas first
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          
-          // Calculate scale to fit image in canvas while maintaining aspect ratio
-          const scale = Math.min(canvasSize / img.width, canvasSize / img.height);
-          const scaledWidth = img.width * scale;
-          const scaledHeight = img.height * scale;
-          
-          // Center the scaled image
-          const x = (canvasSize - scaledWidth) / 2;
-          const y = (canvasSize - scaledHeight) / 2;
-          
-          console.log("🖼️ Drawing image:", { 
-            originalSize: `${img.width}x${img.height}`, 
-            scaledSize: `${scaledWidth}x${scaledHeight}`, 
-            position: `${x},${y}`,
-            canvasSize 
-          });
-          
-          // Draw the scaled and centered image
-          ctx.drawImage(img, 0, 0, img.width, img.height, x, y, scaledWidth, scaledHeight);
-        }
+        // Clear canvas first
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Calculate scale to fit image in canvas while maintaining aspect ratio
+        const scale = Math.min(canvasSize / img.width, canvasSize / img.height);
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+
+        // Center the scaled image
+        const x = (canvasSize - scaledWidth) / 2;
+        const y = (canvasSize - scaledHeight) / 2;
+
+        console.log("🖼️ Drawing image:", {
+          originalSize: `${img.width}x${img.height}`,
+          scaledSize: `${scaledWidth}x${scaledHeight}`,
+          position: `${x},${y}`,
+          canvasSize
+        });
+
+        // Draw the scaled and centered image
+        ctx.drawImage(img, 0, 0, img.width, img.height, x, y, scaledWidth, scaledHeight);
+      };
+      img.onerror = () => {
+        console.error("❌ Failed to load image:", initialImageUrl);
       };
       img.src = initialImageUrl;
     }

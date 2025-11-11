@@ -1,22 +1,34 @@
 
 import { ToolSelector } from "./ToolSelector";
+import { BrushTypeSelector } from "./BrushTypeSelector";
 import { BrushSizeSlider } from "./BrushSizeSlider";
 import { BrushOpacitySlider } from "./BrushOpacitySlider";
+import { SmoothingSlider } from "./SmoothingSlider";
+import { ZoomControls } from "./ZoomControls";
 import { ColorPalette } from "./ColorPalette";
 import { HistoryControls } from "./HistoryControls";
 import { LayersPanel, Layer } from "./LayersPanel";
 import { RasterizeControls } from "./RasterizeControls";
 import { QuickTips } from "./QuickTips";
+import { ToolType, BrushType } from "@/hooks/usePaintCanvas";
 
 interface PaintToolbarProps {
-  tool: 'brush' | 'eraser';
-  setTool: (tool: 'brush' | 'eraser') => void;
+  tool: ToolType;
+  setTool: (tool: ToolType) => void;
+  brushType: BrushType;
+  setBrushType: (type: BrushType) => void;
   brushSize: number;
   setBrushSize: (size: number) => void;
   brushOpacity: number;
   setBrushOpacity: (opacity: number) => void;
+  smoothing: number;
+  setSmoothing: (value: number) => void;
   currentColor: string;
   setCurrentColor: (color: string) => void;
+  zoom: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onResetView: () => void;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -46,12 +58,20 @@ const colors = [
 export const PaintToolbar = ({
   tool,
   setTool,
+  brushType,
+  setBrushType,
   brushSize,
   setBrushSize,
   brushOpacity,
   setBrushOpacity,
+  smoothing,
+  setSmoothing,
   currentColor,
   setCurrentColor,
+  zoom,
+  onZoomIn,
+  onZoomOut,
+  onResetView,
   onUndo,
   onRedo,
   canUndo,
@@ -70,21 +90,42 @@ export const PaintToolbar = ({
   onRasterizeVisible,
   onFlattenImage
 }: PaintToolbarProps) => {
+  const showBrushControls = tool === 'brush' || tool === 'eraser';
+  const showColorControls = tool !== 'eyedropper' && tool !== 'eraser';
+
   return (
     <div className="cozy-card p-2" data-testid="paint-toolbar">
       <div className="space-y-3">
         <ToolSelector tool={tool} setTool={setTool} />
-        <BrushSizeSlider value={brushSize} onChange={setBrushSize} />
-        {tool === 'brush' && (
-          <BrushOpacitySlider value={brushOpacity} onChange={setBrushOpacity} />
+
+        {showBrushControls && (
+          <>
+            <BrushTypeSelector brushType={brushType} setBrushType={setBrushType} />
+            <BrushSizeSlider value={brushSize} onChange={setBrushSize} />
+            {tool === 'brush' && (
+              <BrushOpacitySlider value={brushOpacity} onChange={setBrushOpacity} />
+            )}
+            {tool === 'brush' && brushType !== 'airbrush' && (
+              <SmoothingSlider smoothing={smoothing} setSmoothing={setSmoothing} />
+            )}
+          </>
         )}
-        {tool === 'brush' && (
+
+        {showColorControls && (
           <ColorPalette
             currentColor={currentColor}
             setCurrentColor={setCurrentColor}
             colors={colors}
           />
         )}
+
+        <ZoomControls
+          zoom={zoom}
+          onZoomIn={onZoomIn}
+          onZoomOut={onZoomOut}
+          onReset={onResetView}
+        />
+
         <LayersPanel
           layers={layers}
           activeLayerId={activeLayerId}
@@ -97,17 +138,20 @@ export const PaintToolbar = ({
           onRenameLayer={onRenameLayer}
           onChangeLayerOpacity={onChangeLayerOpacity}
         />
+
         <RasterizeControls
           onRasterizeAll={onRasterizeAll}
           onRasterizeVisible={onRasterizeVisible}
           onFlattenImage={onFlattenImage}
         />
+
         <HistoryControls
           onUndo={onUndo}
           onRedo={onRedo}
           canUndo={canUndo}
           canRedo={canRedo}
         />
+
         <QuickTips />
       </div>
     </div>
