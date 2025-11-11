@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Van's Comfy & Cozy – UI Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Chewy&family=Nunito+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-cream:#FFF9E6; --card-fill:#FDF4DD; --accent-peach:#FFBC96;
+  --accent-green:#A9CFA1; --accent-yellow:#FFE7A0; --accent-pink:#FAD0C5;
+  --line-brown:#BCA57F; --shadow:0 4px 0 rgba(217,181,137,.25);
+  --radius-lg:24px; --radius-sm:12px;
+  font-family:"Nunito Sans",sans-serif; color:#5F5240;
+}
+* {box-sizing:border-box;}
+body{margin:0; background:var(--bg-cream); display:flex; flex-wrap:wrap; gap:32px; padding:32px;}
+.card{background:var(--card-fill); border:3px solid var(--line-brown);
+      border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:24px;}
+h1{font-family:"Chewy",cursive; font-size:40px; margin:0 0 12px; line-height:1.1;}
+label{font-weight:700; display:block; margin-bottom:6px;}
+input, textarea{
+  width:100%; padding:12px; border-radius:var(--radius-sm);
+  border:3px solid var(--line-brown); background:#fff9f3;
+  font-family:inherit; font-size:14px;
+}
+button{border:none; border-radius:var(--radius-sm); padding:12px 24px;
+       font-weight:700; cursor:pointer; font-size:14px;}
+.btn-primary{background:var(--accent-peach);}
+.btn-secondary{background:var(--accent-green);}
+.swatches{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+.swatch{width:32px;height:32px;border-radius:9999px;border:2px solid var(--line-brown);cursor:pointer;}
+.swatch:nth-child(1){background:var(--accent-peach);}
+.swatch:nth-child(2){background:var(--accent-pink);}
+.swatch:nth-child(3){background:var(--accent-yellow);}
+.swatch:nth-child(4){background:var(--accent-green);}
+.swatch:nth-child(5){background:#C7E5A1;}
+.swatch:nth-child(6){background:#FFDEC1;}
+.swatch:nth-child(7){background:#FFE2EF;}
+.swatch:nth-child(8){background:#C4D4FF;}
+.preview-img{
+  width:120px;height:120px;display:block;margin:0 auto 8px;
+}
+</style>
+</head>
+<body>
+  <div class="card" style="width:320px;">
+    <h1>Van’s<br>Comfy and Cozy<br>Little Art Corner</h1>
+    <!-- Simple placeholder illustration -->
+    <svg class="preview-img" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="24" fill="#C7E5A1"></rect>
+      <circle cx="60" cy="60" r="32" fill="#FFF9E6" stroke="#5F5240" stroke-width="3"></circle>
+      <circle cx="50" cy="56" r="4" fill="#5F5240"></circle>
+      <circle cx="70" cy="56" r="4" fill="#5F5240"></circle>
+      <path d="M48 72 C56 80, 64 80, 72 72" stroke="#5F5240" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="card" style="width:280px;">
+    <label>Enter your API Key</label>
+    <input placeholder="sk-..." />
+    <div style="display:flex;gap:12px;margin-top:16px;">
+      <button class="btn-primary">Genen Key</button>
+      <button class="btn-secondary">Clear Key</button>
+    </div>
+  </div>
+
+  <div class="card" style="width:280px; flex:1; min-width:280px;">
+    <label>Describe the image you want to color:</label>
+    <textarea rows="3" placeholder="e.g. cute smiling bunny holding a flower"></textarea>
+    <button class="btn-primary" style="width:100%;margin-top:16px;">Generating your comfy</button>
+
+    <div class="swatches">
+      <div class="swatch"></div><div class="swatch"></div><div class="swatch"></div><div class="swatch"></div>
+      <div class="swatch"></div><div class="swatch"></div><div class="swatch"></div><div class="swatch"></div>
+    </div>
+  </div>
+</body>
+</html>
