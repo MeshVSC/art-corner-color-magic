@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { PaintHeader } from "./PaintHeader";
-import { PaintToolbar } from "./PaintToolbar";
+import { LeftSidebar } from "./LeftSidebar";
+import { RightSidebar } from "./RightSidebar";
 import { PaintCanvas } from "./PaintCanvas";
 import { usePaintHistory } from "@/hooks/usePaintHistory";
 import { useLayers } from "@/hooks/useLayers";
@@ -79,6 +80,10 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
   const [brushOpacity, setBrushOpacity] = useState(100);
   const [smoothing, setSmoothing] = useState(3);
   const [currentColor, setCurrentColor] = useState('#FF6B6B');
+  const [recentColors, setRecentColors] = useState<string[]>([
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+    '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43'
+  ]);
 
   const { saveToHistory, undo, redo, canUndo, canRedo } = usePaintHistory();
 
@@ -102,7 +107,17 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
 
   const handleColorPicked = (color: string) => {
     setCurrentColor(color);
+    addRecentColor(color);
     setTool('brush'); // Switch back to brush after picking color
+  };
+
+  const addRecentColor = (color: string) => {
+    setRecentColors(prev => {
+      // Remove color if it already exists
+      const filtered = prev.filter(c => c.toLowerCase() !== color.toLowerCase());
+      // Add to front and limit to 16 colors
+      return [color, ...filtered].slice(0, 16);
+    });
   };
 
   const {
@@ -190,19 +205,38 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
         ))}
       </div>
 
-      <div className="max-w-6xl mx-auto relative z-20">
+      <div className="w-full h-screen flex flex-col relative z-20">
         <PaintHeader
           onBack={onBack}
           onStartOver={onStartOver}
           canvasRef={canvasRef}
         />
 
-        <div className="flex gap-4">
-          {/* Responsive toolbar */}
-          <div className="w-48 sm:w-56 md:w-64 lg:w-72 xl:w-80 flex-shrink-0">
-            <PaintToolbar
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left Sidebar - Tools only */}
+          <div className="flex-shrink-0">
+            <LeftSidebar
               tool={tool}
               setTool={setTool}
+            />
+          </div>
+
+          {/* Canvas - centered and takes available space */}
+          <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <PaintCanvas
+              canvasRef={canvasRef}
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+              onMouseLeave={stopDrawing}
+              tool={tool}
+            />
+          </div>
+
+          {/* Right Sidebar - Controls, colors, layers */}
+          <div className="flex-shrink-0 w-80 overflow-hidden">
+            <RightSidebar
+              tool={tool}
               brushType={brushType}
               setBrushType={setBrushType}
               brushSize={brushSize}
@@ -213,6 +247,8 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
               setSmoothing={setSmoothing}
               currentColor={currentColor}
               setCurrentColor={setCurrentColor}
+              recentColors={recentColors}
+              onAddRecentColor={addRecentColor}
               zoom={zoom}
               onZoomIn={() => handleZoom(0.1)}
               onZoomOut={() => handleZoom(-0.1)}
@@ -234,18 +270,6 @@ export const PaintScreen = ({ imageUrl, onBack, onStartOver }: PaintScreenProps)
               onRasterizeAll={rasterizeAll}
               onRasterizeVisible={rasterizeVisible}
               onFlattenImage={flattenImage}
-            />
-          </div>
-
-          {/* Canvas takes the rest of the space */}
-          <div className="flex-1">
-            <PaintCanvas
-              canvasRef={canvasRef}
-              onMouseDown={startDrawing}
-              onMouseMove={draw}
-              onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
-              tool={tool}
             />
           </div>
         </div>
